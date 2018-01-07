@@ -88,7 +88,7 @@ def gconnect():
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
         response = make_response(json.dumps
-                  ('Current user is already connected.'), 200)
+                                 ('Current user is already connected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -120,13 +120,15 @@ def gdisconnect():
     access_token = login_session.get('access_token')
     if access_token is None:
         print('Access Token is None')
-        response = make_response(json.dumps('Current user not connected.'), 401)
+        response = make_response(json.dumps
+                                 ('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
     print('In gdisconnect access token is %s', access_token)
     print('User name is: ')
     print(login_session['username'])
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = ("https://accounts.google.com/o/oauth2/revoke?token=%s"
+           % login_session['access_token'])
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print('result is ')
@@ -141,7 +143,9 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-        response = make_response(json.dumps('Failed to revoke token for given user.', 400))
+        response = make_response(json.dumps
+                                 ('Failed to revoke token for given user.',
+                                  400))
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -149,7 +153,7 @@ def gdisconnect():
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
-            for x in range (32))
+                    for x in range(32))
     login_session['state'] = state
     return render_template('login.html', STATE=login_session['state'])
 
@@ -160,9 +164,11 @@ def showCategories():
     categories = session.query(Category).all()
     items = session.query(Item).limit(10)
     if 'username' not in login_session:
-        return render_template('publichome.html', categories=categories, items=items)
+        return render_template('publichome.html',
+                               categories=categories, items=items)
     else:
-        return render_template('home.html', categories=categories, items=items)
+        return render_template('home.html',
+                               categories=categories, items=items)
 
 
 @app.route('/catalog/<int:category_id>/items/json')
@@ -173,7 +179,7 @@ def showItemsJSON(category_id):
     for item in items:
         items[i] = item.serialize
         i = i + 1
-    return jsonify({category.name : items})
+    return jsonify({category.name: items})
 
 
 @app.route('/catalog/<int:category_id>/items/')
@@ -182,9 +188,13 @@ def showItems(category_id):
     categories = session.query(Category).all()
     items = session.query(Item).filter_by(category_id=category_id)
     if 'username' not in login_session:
-        return render_template('publicitems.html', items=items, categories=categories, category=category)
+        return render_template('publicitems.html',
+                               items=items, categories=categories,
+                               category=category)
     else:
-        return render_template('items.html', items=items, categories=categories, category=category)
+        return render_template('items.html',
+                               items=items, categories=categories,
+                               category=category)
 
 
 @app.route('/catalog/<int:category_id>/items/<int:item_id>/json')
@@ -199,9 +209,11 @@ def showItem(category_id, item_id):
     categories = session.query(Category).all()
     item = session.query(Item).filter_by(id=item_id).one()
     if 'username' not in login_session:
-        return render_template('publicitem.html', item=item, categories=categories)
+        return render_template('publicitem.html',
+                               item=item, categories=categories)
     else:
-        return render_template('item.html', item=item, categories=categories)
+        return render_template('item.html',
+                               item=item, categories=categories)
 
 
 @app.route('/catalog/items/new/', methods=['GET', 'POST'])
@@ -238,27 +250,30 @@ def newIteminCategory(category_id):
         return render_template('newIteminCategory.html', category=category)
 
 
-@app.route('/catalog/<int:category_id>/items/<int:item_id>/edit' , methods=['GET', 'POST'])
+@app.route('/catalog/<int:category_id>/items/<int:item_id>/edit',
+           methods=['GET', 'POST'])
 def editItem(category_id, item_id):
     if 'username' not in login_session:
         return redirect('/login')
     item = session.query(Item).filter_by(id=item_id).one()
-    if request.method=='POST':
+    if request.method == 'POST':
         item.name = request.form['name']
         item.description = request.form['description']
         session.add(item)
         session.commit()
-        return redirect(url_for('showItem', category_id=item.category_id, item_id=item.id))
+        return redirect(url_for('showItem',
+                                category_id=item.category_id, item_id=item.id))
     else:
         return render_template('editItem.html', item=item)
 
 
-@app.route('/catalog/<int:category_id>/items/<int:item_id>/delete', methods=['GET', 'POST'])
+@app.route('/catalog/<int:category_id>/items/<int:item_id>/delete',
+           methods=['GET', 'POST'])
 def deleteItem(item_id, category_id):
     if 'username' not in login_session:
         return redirect('/login')
     item = session.query(Item).filter_by(id=item_id).one()
-    if request.method=='POST':
+    if request.method == 'POST':
         session.delete(item)
         session.commit()
         return redirect(url_for('showItems', category_id=item.category_id))
