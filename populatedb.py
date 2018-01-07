@@ -18,6 +18,12 @@ DBSession = sessionmaker(bind=engine)
 # session.rollback()
 session = DBSession()
 
+session.query(Item).delete()
+session.commit()
+
+session.query(Category).delete()
+session.commit()
+
 Fashion = Category(name = "Fashion")
 
 session.add(Fashion)
