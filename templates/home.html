@@ -1,0 +1,27 @@
+<html>
+<head>
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <div class="header">
+    <a class="header-title">Faryal's Awesome Catalog</a>
+    <a class="button float-right" href="{{url_for('gdisconnect')}}">Logout</a>
+  </div>
+  </header>
+  <div class="container">
+  <div class="sidebar">
+    {% for category in categories %}
+    <a class="list-item" href="{{url_for('showItems', category_id=category.id)}}">{{category.name}}</a>
+    {% endfor %}
+  </div>
+  <div class="main-content">
+    <a class="button float-right" href="{{url_for('newItem')}}">Add an Item</a>
+    {% for item in items %}
+    <a class="list-item" href="{{url_for('showItem', category_id=item.category_id, item_id=item.id)}}">{{item.name}} ({{item.category.name}})</a>
+    {% endfor %}
+  </div>
+
+</div>
+</body>
+</html>
